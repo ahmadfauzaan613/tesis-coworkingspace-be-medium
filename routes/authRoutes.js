@@ -7,9 +7,11 @@ const router = express.Router();
 
 /**
  * @openapi
- * /api/auth/login:
+ * /api/v1/auth/login:
  *   post:
  *     summary: Administrator Login
+ *     tags:
+ *       - Auth
  *     requestBody:
  *       required: true
  *       content:
@@ -34,9 +36,11 @@ router.post('/login', asyncHandler(authController.login));
 
 /**
  * @openapi
- * /api/auth/me:
+ * /api/v1/auth/me:
  *   get:
  *     summary: Get logged-in Admin credentials info
+ *     tags:
+ *       - Auth
  *     responses:
  *       200:
  *         description: Returns administrator identity profile

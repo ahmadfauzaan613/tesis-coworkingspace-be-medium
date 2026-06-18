@@ -4,32 +4,58 @@ import { AppError } from '../utils/AppError.js';
 export const assetController = {
   getAll: async (req, res) => {
     const { search, categoryId, status, lowStock } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
 
-    let query = db('assets')
+    // Helper query builder to apply filters on both count and select operations
+    const getBaseQuery = () => {
+      let q = db('assets');
+      
+      if (search) {
+        q = q.andWhere((builder) => {
+          builder.where('assets.name', 'ilike', `%${search}%`)
+                 .orWhere('assets.sku', 'ilike', `%${search}%`);
+        });
+      }
+
+      if (categoryId) {
+        q = q.andWhere('assets.category_id', categoryId);
+      }
+
+      if (status) {
+        q = q.andWhere('assets.status', status);
+      }
+
+      if (lowStock === 'true') {
+        q = q.andWhere('assets.stock', '<', 5);
+      }
+
+      return q;
+    };
+
+    // 1. Get total matching count
+    const [countResult] = await getBaseQuery().count('id as count');
+    const totalItems = parseInt(countResult.count, 10) || 0;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    // 2. Fetch paginated records with category relation JOIN
+    const assets = await getBaseQuery()
       .join('categories', 'assets.category_id', '=', 'categories.id')
-      .select('assets.*', 'categories.name as category_name');
+      .select('assets.*', 'categories.name as category_name')
+      .orderBy('assets.id', 'asc')
+      .limit(limit)
+      .offset(offset);
 
-    if (search) {
-      query = query.andWhere((builder) => {
-        builder.where('assets.name', 'ilike', `%${search}%`)
-               .orWhere('assets.sku', 'ilike', `%${search}%`);
-      });
-    }
-
-    if (categoryId) {
-      query = query.andWhere('assets.category_id', categoryId);
-    }
-
-    if (status) {
-      query = query.andWhere('assets.status', status);
-    }
-
-    if (lowStock === 'true') {
-      query = query.andWhere('assets.stock', '<', 5);
-    }
-
-    const assets = await query.orderBy('assets.id', 'asc');
-    res.json(assets);
+    res.json({
+      data: assets,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        limit
+      }
+    });
   },
 
   create: async (req, res) => {
@@ -193,6 +219,14 @@ export const assetController = {
   },
 
   getGlobalHistory: async (req, res) => {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    const [countResult] = await db('stock_history').count('id as count');
+    const totalItems = parseInt(countResult.count, 10) || 0;
+    const totalPages = Math.ceil(totalItems / limit);
+
     const logs = await db('stock_history')
       .join('assets', 'stock_history.asset_id', '=', 'assets.id')
       .leftJoin('users', 'stock_history.admin_id', '=', 'users.id')
@@ -202,17 +236,48 @@ export const assetController = {
         'assets.sku as asset_sku',
         'users.username as admin_username'
       )
-      .orderBy('stock_history.created_at', 'desc');
-    res.json(logs);
+      .orderBy('stock_history.created_at', 'desc')
+      .limit(limit)
+      .offset(offset);
+
+    res.json({
+      data: logs,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        limit
+      }
+    });
   },
 
   getAssetHistory: async (req, res) => {
     const assetId = req.params.id;
+    
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    const [countResult] = await db('stock_history').where('asset_id', assetId).count('id as count');
+    const totalItems = parseInt(countResult.count, 10) || 0;
+    const totalPages = Math.ceil(totalItems / limit);
+
     const logs = await db('stock_history')
       .leftJoin('users', 'stock_history.admin_id', '=', 'users.id')
       .select('stock_history.*', 'users.username as admin_username')
       .where('stock_history.asset_id', assetId)
-      .orderBy('stock_history.created_at', 'desc');
-    res.json(logs);
+      .orderBy('stock_history.created_at', 'desc')
+      .limit(limit)
+      .offset(offset);
+
+    res.json({
+      data: logs,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        limit
+      }
+    });
   }
 };

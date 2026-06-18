@@ -26,10 +26,10 @@ app.use(
 app.use(express.json());
 
 // Mount Swagger Documentation UI
-app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Mount Master API Router
-app.use("/api", apiRouter);
+app.use("/api/v1", apiRouter);
 
 // 404 Route Fallback
 app.use((req, res, next) => {
