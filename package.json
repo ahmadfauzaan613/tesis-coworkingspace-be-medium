@@ -7,6 +7,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "db:migrate": "knex migrate:latest",
+    "db:rollback": "knex migrate:rollback",
+    "db:seed": "knex seed:run",
+    "db:setup": "knex migrate:latest && knex seed:run",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

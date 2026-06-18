@@ -17,9 +17,9 @@ const useConnectionString = connectionString &&
 const connection = useConnectionString
   ? { 
       connectionString,
-      ssl: connectionString.includes('127.0.0.1') || connectionString.includes('localhost') 
-        ? false 
-        : { rejectUnauthorized: false } 
+      ssl: process.env.POSTGRES_SSL === 'true'
+        ? { rejectUnauthorized: false }
+        : false 
     }
   : {
       host: process.env.POSTGRES_HOST || process.env.DB_HOST || '127.0.0.1',
@@ -27,9 +27,7 @@ const connection = useConnectionString
       database: process.env.POSTGRES_DB || process.env.DB_NAME || 'coworkingspace_db',
       user:     process.env.POSTGRES_USER || process.env.DB_USER || 'postgres',
       password: process.env.POSTGRES_PASSWORD || process.env.DB_PASSWORD || 'postgres',
-      ssl: process.env.POSTGRES_HOST && 
-           process.env.POSTGRES_HOST !== '127.0.0.1' && 
-           process.env.POSTGRES_HOST !== 'localhost'
+      ssl: process.env.POSTGRES_SSL === 'true'
         ? { rejectUnauthorized: false }
         : false
     };
