@@ -34,18 +34,20 @@ const connection = useConnectionString
         : false
     };
 
+const schema = process.env.POSTGRES_SCHEMA || 'tesis_medium';
+
 const config = {
   development: {
     client: 'postgresql',
     connection,
-    searchPath: ['tesis_medium', 'public'],
+    searchPath: [schema, 'public'],
     pool: {
       min: 2,
       max: 10,
       afterCreate: function (conn, cb) {
-        // Automatically create the tesis_medium schema if it doesn't exist
+        // Automatically create the schema if it doesn't exist
         // and set the connection search_path to search there first
-        conn.query('CREATE SCHEMA IF NOT EXISTS tesis_medium; SET search_path TO tesis_medium, public;', function (err) {
+        conn.query(`CREATE SCHEMA IF NOT EXISTS ${schema}; SET search_path TO ${schema}, public;`, function (err) {
           cb(err, conn);
         });
       }
@@ -53,7 +55,7 @@ const config = {
     migrations: {
       tableName: 'knex_migrations',
       directory: './migrations',
-      schemaName: 'tesis_medium'
+      schemaName: schema
     },
     seeds: {
       directory: './seeds'
