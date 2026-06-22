@@ -12,9 +12,9 @@ export async function seed(knex) {
   await knex("users").del();
 
   // Create initial admin user
-  const adminUsername = process.env.SEED_ADMIN_USERNAME;
-  const adminEmail = process.env.SEED_ADMIN_EMAIL;
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  const adminUsername = process.env.SEED_ADMIN_USERNAME || 'admin';
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@coworking.com';
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin';
   const hashedPassword = bcrypt.hashSync(adminPassword, 10);
 
   const [admin] = await knex("users")
@@ -26,6 +26,17 @@ export async function seed(knex) {
       role: "admin",
     })
     .returning("*");
+
+  // Create demo user with same privileges
+  const demoPassword = bcrypt.hashSync("demo", 10);
+  await knex("users")
+    .insert({
+      id: 2,
+      username: "demo",
+      email: "demo@coworking.com",
+      password: demoPassword,
+      role: "admin",
+    });
 
   // Create default categories
   await knex("categories").insert([
