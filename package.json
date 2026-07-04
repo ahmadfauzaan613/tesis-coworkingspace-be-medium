@@ -11,26 +11,9 @@
     "db:rollback": "knex migrate:rollback",
     "db:seed": "knex seed:run",
     "db:setup": "knex migrate:latest && knex seed:run",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest --runInBand",
-    "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage",
-    "sonar": "npm run test:coverage && sonar-scanner"
-  },
-  "jest": {
-    "transform": {},
-    "testEnvironment": "node",
-    "testMatch": [
-      "**/tests/**/*.test.js"
-    ],
-    "collectCoverageFrom": [
-      "**/*.js",
-      "!index.js",
-      "!knexfile.js",
-      "!migrations/**",
-      "!seeds/**",
-      "!node_modules/**",
-      "!coverage/**"
-    ],
-    "coverageDirectory": "coverage"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -44,8 +27,9 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "jest": "^30.4.2",
+    "@vitest/coverage-v8": "^4.1.9",
     "nodemon": "^3.1.14",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.9"
   }
 }
