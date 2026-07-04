@@ -13,7 +13,8 @@
     "db:setup": "knex migrate:latest && knex seed:run",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "sonar": "npm run test:coverage && sonar-scanner"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
