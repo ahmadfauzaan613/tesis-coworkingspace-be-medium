@@ -5,6 +5,10 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./tests/setup.js'],
     include: ['tests/**/*.test.js'],
+    reporters: [
+      'default',
+      ['vitest-sonar-reporter', { outputFile: 'sonar-report.xml' }]
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
